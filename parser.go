@@ -93,6 +93,9 @@ type Parser struct {
 
 	// excludes excludes dirs and files in SearchDir
 	excludes map[string]bool
+
+	// includes includes dirs and files in SearchDir
+	includes map[string]bool
 }
 
 // New creates a new Parser with default properties.
@@ -121,6 +124,7 @@ func New(options ...func(*Parser)) *Parser {
 		existSchemaNames:   make(map[string]*Schema),
 		toBeRenamedSchemas: make(map[string]string),
 		excludes:           make(map[string]bool),
+		includes:           make(map[string]bool),
 	}
 
 	for _, option := range options {
@@ -152,6 +156,19 @@ func SetExcludedDirsAndFiles(excludes string) func(*Parser) {
 			if f != "" {
 				f = filepath.Clean(f)
 				p.excludes[f] = true
+			}
+		}
+	}
+}
+
+// SetIncludedDirsAndFiles sets directories and files to be excluded when searching
+func SetIncludedDirsAndFiles(includes string) func(*Parser) {
+	return func(p *Parser) {
+		for _, f := range strings.Split(includes, ",") {
+			f = strings.TrimSpace(f)
+			if f != "" {
+				f = filepath.Clean(f)
+				p.includes[f] = true
 			}
 		}
 	}
@@ -1444,6 +1461,12 @@ func (parser *Parser) Skip(path string, f os.FileInfo) error {
 
 		if parser.excludes != nil {
 			if _, ok := parser.excludes[path]; ok {
+				return filepath.SkipDir
+			}
+		}
+
+		if parser.includes != nil {
+			if _, ok := parser.excludes[path]; !ok {
 				return filepath.SkipDir
 			}
 		}

@@ -93,9 +93,6 @@ type Parser struct {
 
 	// excludes excludes dirs and files in SearchDir
 	excludes map[string]bool
-
-	// includes includes dirs and files in SearchDir
-	includes map[string]bool
 }
 
 // New creates a new Parser with default properties.
@@ -124,7 +121,6 @@ func New(options ...func(*Parser)) *Parser {
 		existSchemaNames:   make(map[string]*Schema),
 		toBeRenamedSchemas: make(map[string]string),
 		excludes:           make(map[string]bool),
-		includes:           make(map[string]bool),
 	}
 
 	for _, option := range options {
@@ -161,19 +157,6 @@ func SetExcludedDirsAndFiles(excludes string) func(*Parser) {
 	}
 }
 
-// SetIncludedDirsAndFiles sets directories and files to be excluded when searching
-func SetIncludedDirsAndFiles(includes string) func(*Parser) {
-	return func(p *Parser) {
-		for _, f := range strings.Split(includes, ",") {
-			f = strings.TrimSpace(f)
-			if f != "" {
-				f = filepath.Clean(f)
-				p.includes[f] = true
-			}
-		}
-	}
-}
-
 // ParseAPI parses general api info for given searchDir and mainAPIFile
 func (parser *Parser) ParseAPI(searchDir string, mainAPIFile string, parseDepth int) error {
 	return parser.ParseAPIMultiSearchDir([]string{searchDir}, mainAPIFile, parseDepth)
@@ -194,7 +177,12 @@ func (parser *Parser) ParseAPIMultiSearchDir(searchDirs []string, mainAPIFile st
 		}
 	}
 
-	absMainAPIFilePath, err := filepath.Abs(filepath.Join(searchDirs[0], mainAPIFile))
+	path, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+
+	absMainAPIFilePath, err := filepath.Abs(filepath.Join(path, mainAPIFile))
 	if err != nil {
 		return err
 	}
@@ -1461,12 +1449,6 @@ func (parser *Parser) Skip(path string, f os.FileInfo) error {
 
 		if parser.excludes != nil {
 			if _, ok := parser.excludes[path]; ok {
-				return filepath.SkipDir
-			}
-		}
-
-		if parser.includes != nil {
-			if _, ok := parser.excludes[path]; !ok {
 				return filepath.SkipDir
 			}
 		}

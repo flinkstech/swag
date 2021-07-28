@@ -13,7 +13,6 @@ import (
 const (
 	searchDirFlag        = "dir"
 	excludeFlag          = "exclude"
-	includeFlag          = "include"
 	generalInfoFlag      = "generalInfo"
 	propertyStrategyFlag = "propertyStrategy"
 	outputFlag           = "output"
@@ -42,10 +41,6 @@ var initFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:  excludeFlag,
 		Usage: "Exclude directories and files when searching, comma separated",
-	},
-	&cli.StringFlag{
-		Name:  includeFlag,
-		Usage: "If provided, only the directories and files within searchDir will be searched, comma separated",
 	},
 	&cli.StringFlag{
 		Name:    propertyStrategyFlag,

@@ -282,10 +282,12 @@ func (parser *Parser) ParseAPIMultiSearchDir(searchDirs []string, mainAPIFile st
 		}
 	}
 
-	absMainAPIFilePath, err := filepath.Abs(filepath.Join(searchDirs[0], mainAPIFile))
+	path, err := os.Getwd()
 	if err != nil {
 		return err
 	}
+
+	absMainAPIFilePath, err := filepath.Abs(filepath.Join(path, mainAPIFile))
 
 	if parser.ParseDependency {
 		var tree depth.Tree
@@ -518,7 +520,10 @@ func parseGeneralAPIInfo(parser *Parser, comments []string) error {
 
 			parser.swagger.SecurityDefinitions[value] = tryAddDescription(secOAuth2Password(attrs["@tokenurl"], scopes, ext), ext)
 		case "@securitydefinitions.oauth2.accesscode":
-			attrs, scopes, ext, err := parseSecAttr(attribute, []string{"@tokenurl", "@authorizationurl"}, comments, &line)
+			attrs, scopes, ext, err := parseSecAttr(attribute, []string{
+				"@tokenurl",
+				"@authorizationurl",
+			}, comments, &line)
 			if err != nil {
 				return err
 			}

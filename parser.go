@@ -288,6 +288,7 @@ func (parser *Parser) ParseAPIMultiSearchDir(searchDirs []string, mainAPIFile st
 	}
 
 	absMainAPIFilePath, err := filepath.Abs(filepath.Join(path, mainAPIFile))
+	parser.debug.Printf("absMainAPIFilePath:%s", absMainAPIFilePath)
 
 	if parser.ParseDependency {
 		var tree depth.Tree
